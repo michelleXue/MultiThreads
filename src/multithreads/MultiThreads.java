@@ -5,6 +5,12 @@
  */
 package multithreads;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author xue
@@ -14,49 +20,49 @@ public class MultiThreads {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // TODO code application logic here
+        List<Integer> list = new ArrayList<>();
+        List<Integer> sortedlist = new ArrayList<>();
         
-    }
-    
-    public static void QuickSort(int[] values, int low, int high) {
-        
-        if (low < high) {
-            int p = Partition(values, low, high);
-            QuickSort(values, low, p);
-            QuickSort(values, p + 1, high);
-        }
-    }
-    
-    public static int Partition(int[] values, int low, int high) {
-        
-        int pivot = values[low];
-        int i = low - 1;
-        int j = high + 1;
-        
-        while(true){
-            do {
-                i = i + 1;
-            } while(values[i] < pivot);
-            do {
-                j = j - 1;
-            } while(values[j] > pivot);
-            
-            if (values[j] > pivot){
-                break;
+        if (args.length == 0) {
+            System.out.println("No Command Line arguments");
+        } else { 
+            for (int i = 0; i < args.length; i++) {
+            list.add(Integer.parseInt(args[i]));
             }
         }
         
-        values = swap(values, i, j);
+        int middle = list.size()/2;
         
-        return j;
-    }
+        InsertionSort r1 = new InsertionSort(list.subList(0, middle));
+        Thread t1 = new Thread(r1);
+        t1.start();
+        
+        InsertionSort r2 = new InsertionSort(list.subList(middle, list.size()));
+        Thread t2 = new Thread(r2);
+        t2.start();
+        
+        try {
+          t1.join( );
+          t2.join( );
+        }catch (InterruptedException e) {}
+        
+        //System.out.print(list);
+        MergeLists r3 = new MergeLists(list.subList(0, middle), list.subList(middle, list.size()), sortedlist);
+        Thread t3 = new Thread(r3);
+        t3.start();
+        
+        try {
+          t3.join( );
+        }catch (InterruptedException e) {}
+        
+        System.out.print(sortedlist);
+        File filew = new File("C:\\Users\\zxuuzx\\Desktop\\output.txt");
+        FileWriter fileWriter = new FileWriter(filew,true);
+        fileWriter.write(sortedlist.toString() + "\n");
+        fileWriter.close();
 
-    public static int[] swap(int[] values, int i, int j) {
-        int tmp = values[i];
-        values[i] = values[j];
-        values[j] = tmp;
-        
-        return values;
     }
+    
 }
